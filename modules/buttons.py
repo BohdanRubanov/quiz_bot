@@ -7,3 +7,15 @@ def start_buttons():
     ]
     markup = ReplyKeyboardMarkup(keyboard=list_buttons, resize_keyboard=True)
     return markup
+
+def teacher_buttons():
+    button1 = KeyboardButton(text="Створити тест")
+    button2 = KeyboardButton(text="Видалити тест")
+    button3 = KeyboardButton(text="Переглянути мої тести")
+    list_buttons = [
+        [button1],
+        [button2],
+        [button3]
+    ]
+    markup = ReplyKeyboardMarkup(keyboard=list_buttons, resize_keyboard=True)
+    return markup
