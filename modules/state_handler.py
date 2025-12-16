@@ -26,7 +26,7 @@ async def number_handler(message: Message, state: FSMContext):
     save_data(user_json_data)
     await message.answer(text="Реєстрація успішна")
     await state.clear()
-    
+
 @dispatcher.message(Teacher.choise)
 async def choise_handler(message: Message, state: FSMContext):
     if message.text == "Створити тест":
@@ -45,10 +45,21 @@ async def questions_count_handler(message: Message, state: FSMContext):
 @dispatcher.message(Teacher.questions)
 async def questions_handler(message: Message, state: FSMContext):
     state_data = await state.get_data()
+    await state.update_data(options = [])
+    await state.set_state(Teacher.options)
+    await message.answer(text="Введіть варіанти відповідей")
+    
     if int(state_data["questions_count"]) > len(state_data["questions"]):
-        questions_list:list = state_data["questions"]
-        questions_list.append(message.text)
-        await state.update_data(questions = questions_list)
+        try:
+            question_data = {
+                "text": message.text,
+                "options": state_data["options"]
+            }
+            questions_list:list = state_data["questions"]
+            questions_list.append(question_data)
+            await state.update_data(questions = questions_list)
+        except:
+            pass
     else:
         test_data = await state.get_data()
         user_json_data = json_data()
@@ -56,6 +67,14 @@ async def questions_handler(message: Message, state: FSMContext):
         user["test_list"].append(test_data["questions"])
         user_json_data[f"{message.from_user.id}"] = user
         save_data(user_json_data)
-
-    
-
+        
+@dispatcher.message(Teacher.options)
+async def options_handler(message: Message, state: FSMContext):
+    state_data = await state.get_data()
+    if 4 > len(state_data["options"]):
+        options_list:list = state_data["options"]
+        options_list.append(message.text)
+        await state.update_data(options = options_list)
+    else:
+        await state.set_state(Teacher.questions)
+        
