@@ -19,3 +19,11 @@ def teacher_buttons():
     ]
     markup = ReplyKeyboardMarkup(keyboard=list_buttons, resize_keyboard=True)
     return markup
+    
+def endtest_buttons():
+    button1 = KeyboardButton(text="Завершити створення тесту")
+    list_buttons = [
+        [button1]
+    ]
+    markup = ReplyKeyboardMarkup(keyboard=list_buttons, resize_keyboard=True)
+    return markup
