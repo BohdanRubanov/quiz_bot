@@ -3,7 +3,7 @@ from .states import Registration, Teacher
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from .work_json import json_data, save_data
-from .buttons import endtest_buttons
+from .buttons import endtest_buttons, teacher_buttons, test_buttons
 
 @dispatcher.message(Registration.name)
 async def name_handler(message: Message, state: FSMContext):
@@ -33,6 +33,21 @@ async def choise_handler(message: Message, state: FSMContext):
     if message.text == "Створити тест":
         await state.set_state(Teacher.questions_count)
         await message.answer(text= "Введіть кількість питань")
+    elif message.text == "Переглянути мої тести":
+        users_data = json_data()
+        user_data: dict = users_data[f"{message.from_user.id}"]
+        tests: list = user_data["test_list"]
+        for test in tests: 
+            test: list = test 
+            test_message = f"Тест №{tests.index(test)+1}"
+            for question in test:
+                text = question["text"]
+                options = question["options"]
+                test_message += f"\n\nПитання {test.index(question)+1}: {text} \nВаріанти: {" | ".join(options)}"
+
+
+            await message.answer(text= test_message, reply_markup= test_buttons(test_index=tests.index(test)))
+
 
     
 @dispatcher.message(Teacher.questions_count)
@@ -66,8 +81,9 @@ async def questions_handler(message: Message, state: FSMContext):
         user["test_list"].append(test_data["questions"])
         user_json_data[f"{message.from_user.id}"] = user
         save_data(user_json_data)
-        await message.answer(text= "Тест успішно збережено")
+        await message.answer(text= "Тест успішно збережено", reply_markup= teacher_buttons())
         await state.clear()
+        await state.set_state(Teacher.choise)
         
 @dispatcher.message(Teacher.options)
 async def options_handler(message: Message, state: FSMContext):

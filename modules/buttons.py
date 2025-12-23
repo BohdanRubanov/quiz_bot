@@ -1,4 +1,4 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 def start_buttons():
     button1 = KeyboardButton(text="Вчитель")
     button2 = KeyboardButton(text="Учень")
@@ -26,4 +26,14 @@ def endtest_buttons():
         [button1]
     ]
     markup = ReplyKeyboardMarkup(keyboard=list_buttons, resize_keyboard=True)
+    return markup
+
+def test_buttons(test_index:int):
+    button1 = InlineKeyboardButton(text= "Розпочати тест", callback_data= "start_test")
+    button2 = InlineKeyboardButton(text= "Видалити тест", callback_data= f"delete_test/{test_index}")
+    list_buttons = [
+        [button1],
+        [button2]
+    ]
+    markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
     return markup
