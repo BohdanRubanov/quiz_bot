@@ -15,7 +15,7 @@ async def name_handler(message: Message, state: FSMContext):
 async def number_handler(message: Message, state: FSMContext):
     await state.update_data(phone_number= message.text)
     user_data = await state.get_data()
-    user_json_data = json_data()
+    user_json_data = json_data(file_name="users.json")
     user_json_data.setdefault(
         message.from_user.id, 
         {
@@ -24,7 +24,7 @@ async def number_handler(message: Message, state: FSMContext):
             "test_list": []
         }
     )
-    save_data(user_json_data)
+    save_data(file_name="users.json", data=user_json_data)
     await message.answer(text="Реєстрація успішна")
     await state.clear()
 
@@ -34,7 +34,7 @@ async def choise_handler(message: Message, state: FSMContext):
         await state.set_state(Teacher.questions_count)
         await message.answer(text= "Введіть кількість питань")
     elif message.text == "Переглянути мої тести":
-        users_data = json_data()
+        users_data = json_data(file_name="users.json")
         user_data: dict = users_data[f"{message.from_user.id}"]
         tests: list = user_data["test_list"]
         for test in tests: 
@@ -55,7 +55,6 @@ async def questions_count_handler(message: Message, state: FSMContext):
     await state.update_data(questions_count = message.text)
     await state.update_data(questions = [])
     await state.set_state(Teacher.questions)
-    # await message.answer(text="Питання потрібно вводити у відповідному вигляді:\n Номер питання. Текст питання \n Приклад:\n 1. Скільки буде 2+2?")
     await message.answer(text="Введіть перше питання")
 
 @dispatcher.message(Teacher.questions)
@@ -76,11 +75,11 @@ async def questions_handler(message: Message, state: FSMContext):
         
     else:
         test_data = await state.get_data()
-        user_json_data = json_data()
+        user_json_data = json_data(file_name="users.json")
         user = user_json_data[f"{message.from_user.id}"]
         user["test_list"].append(test_data["questions"])
         user_json_data[f"{message.from_user.id}"] = user
-        save_data(user_json_data)
+        save_data(file_name="users.json", data=user_json_data)
         await message.answer(text= "Тест успішно збережено", reply_markup= teacher_buttons())
         await state.clear()
         await state.set_state(Teacher.choise)

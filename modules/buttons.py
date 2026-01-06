@@ -29,11 +29,11 @@ def endtest_buttons():
     return markup
 
 def test_buttons(test_index:int):
-    button1 = InlineKeyboardButton(text= "Розпочати тест", callback_data= "start_test")
+    button1 = InlineKeyboardButton(text= "Розпочати тест", callback_data= f"start_test/{test_index}")
     button2 = InlineKeyboardButton(text= "Видалити тест", callback_data= f"delete_test/{test_index}")
     list_buttons = [
         [button1],
         [button2]
     ]
     markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
-    return markup
+    return markup 
