@@ -1,5 +1,5 @@
 from .settings import dispatcher
-from .states import Registration, Teacher
+from .states import Registration, Teacher, Student
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from .work_json import json_data, save_data
@@ -105,3 +105,21 @@ async def options_handler(message: Message, state: FSMContext):
                 reply_markup= endtest_buttons()
             )
         
+@dispatcher.message(Student.code)
+async def code_handler(message: Message, state: FSMContext):
+    await state.update_data(code= message.text)
+    await state.set_state(Student.student_name)
+    await message.answer(text="Введіть своє ім'я")
+
+@dispatcher.message(Student.student_name)
+async def student_name_handler(message: Message, state: FSMContext):
+    state_data = await state.get_data()
+    active_tests = json_data(file_name="active_tests.json")
+    current_test: dict = active_tests.get(f"{state_data["code"]}")
+    
+    students:dict = current_test["students"]
+    students.setdefault(f"{message.from_user.id}", {
+        "name" : message.text,
+        "answers" : []
+    })
+    save_data(file_name="active_tests.json", data= active_tests)

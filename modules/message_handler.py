@@ -2,7 +2,7 @@ from .settings import dispatcher
 from aiogram.types import Message
 from .work_json import json_data
 from aiogram.fsm.context import FSMContext
-from .states import Registration, Teacher
+from .states import Registration, Teacher, Student
 from .buttons import teacher_buttons
 @dispatcher.message()
 async def message_handler(message: Message, state: FSMContext):
@@ -14,3 +14,7 @@ async def message_handler(message: Message, state: FSMContext):
         else:
             await state.set_state(Registration.name)
             await message.answer(text="Потрібно зареєструватися. Введіть своє ім'я")
+    elif message.text == "Учень":
+        await message.answer(text="Введіть код для підключення до тесту")
+        await state.set_state(Student.code)
+        

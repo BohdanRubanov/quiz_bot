@@ -10,21 +10,8 @@ class Teacher(StatesGroup):
     questions = State()
     options = State()
 
+class Student(StatesGroup):
+    code = State()
+    student_name = State()
 
 
-# {
-#     "test_list": [
-#         [
-#            {
-#                "text": "2+2=?",
-#                "options": ["3", "5", "4", "8"],
-#                "correct_option": "4"
-#            },
-#            {
-#                "text": "2+2=?",
-#                "options": ["3", "5", "4", "8"],
-#                "correct_option": "4"
-#            },
-#         ]
-#     ]
-# }
