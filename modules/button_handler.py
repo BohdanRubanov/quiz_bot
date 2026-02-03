@@ -1,7 +1,7 @@
 from .settings import dispatcher
 from aiogram.types import CallbackQuery
 from .work_json import json_data, save_data
-from .buttons import start_button, next_question
+from .buttons import start_button, next_question, end_test
 from .settings import bot
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import random
@@ -61,14 +61,23 @@ async def callback_handler(callback: CallbackQuery):
         students: dict = current_test["students"]
         options: list = question["options"]
         list_buttons = []
-        for option in options:
-            button = InlineKeyboardButton(text= option, callback_data=f"answer/{options.index(option)}/{code}")
+        options_copy = options.copy()
+        
+        random.shuffle(options_copy)
+        for option in options_copy:
+            if option == options[0]:
+                button = InlineKeyboardButton(text= option, callback_data=f"answer/{0}/{code}")
+            else:
+                button = InlineKeyboardButton(text= option, callback_data=f"answer/{1}/{code}")
             list_buttons.append([button])
         markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
 
         for key, _ in students.items():
             await bot.send_message(chat_id= int(key), text= question["text"], reply_markup= markup) 
-        await callback.message.answer(text= question["text"], reply_markup= next_question(question_index=question_index, code=code))
+        if question_index != len(questions)-1:    
+            await callback.message.answer(text= question["text"], reply_markup= next_question(question_index=question_index, code=code))
+        else:
+            await callback.message.answer(text= question["text"], reply_markup= end_test(code=code))
     elif callback_data[0] == "answer":
         _, option_index, code = callback_data
         option_index = int(option_index)
@@ -79,7 +88,9 @@ async def callback_handler(callback: CallbackQuery):
         answers: list = students[user_id]["answers"]
         question_index = len(answers)
         question = current_test["test"][question_index]
-        option_text = question["options"][option_index]
-        answers.append(option_text)
+        
+        
+        answers.append(option_index)
         save_data(file_name="active_tests.json", data=active_tests)
         await callback.message.answer(text="Відповідь збережено")
+     

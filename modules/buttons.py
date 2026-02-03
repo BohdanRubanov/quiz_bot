@@ -53,3 +53,10 @@ def next_question(question_index: int, code: int):
     ]
     markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
     return markup 
+def end_test(code:int):
+    button = InlineKeyboardButton(text="Завершити тест", callback_data=f"end_test/{code}")
+    list_buttons = [
+        [button]
+    ]
+    markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
+    return markup 

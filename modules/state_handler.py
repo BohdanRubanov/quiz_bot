@@ -64,7 +64,7 @@ async def questions_handler(message: Message, state: FSMContext):
     await state.set_state(Teacher.options)
     
     if int(state_data["questions_count"]) > len(state_data["questions"]):
-        await message.answer(text="Введіть варіанти відповідей")
+        await message.answer(text="Введіть перший варіант відповідей. Він завжди буде правильний✅")
         question_data = {
             "text": message.text,
             "options": state_data["options"]
@@ -91,7 +91,7 @@ async def options_handler(message: Message, state: FSMContext):
         options_list:list = state_data["options"]
         options_list.append(message.text)
         await state.update_data(options = options_list)
-        await message.answer(text= "Варіант відповіді збережено. Введіть наступний: ")
+        await message.answer(text= "Варіант відповіді збережено. Введіть наступний❌: ")
     else:
         options_list:list = state_data["options"]
         options_list.append(message.text)
