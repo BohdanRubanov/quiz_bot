@@ -45,3 +45,11 @@ def start_button(code:int):
     ]
     markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
     return markup 
+
+def next_question(question_index: int, code: int):
+    button = InlineKeyboardButton(text="Наступне питання", callback_data=f"next_question/{code}/{question_index}")
+    list_buttons = [
+        [button]
+    ]
+    markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
+    return markup 

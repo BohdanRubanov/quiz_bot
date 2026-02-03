@@ -1,8 +1,9 @@
 from .settings import dispatcher
 from aiogram.types import CallbackQuery
 from .work_json import json_data, save_data
-from .buttons import start_button
+from .buttons import start_button, next_question
 from .settings import bot
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import random
 @dispatcher.callback_query()
 async def callback_handler(callback: CallbackQuery):
@@ -33,11 +34,52 @@ async def callback_handler(callback: CallbackQuery):
         save_data(file_name="active_tests.json", data=active_tests_data)
         await callback.message.answer(text=str(code), reply_markup= start_button(code))
     elif callback_data[0] == "start_test":
+        code = callback_data[1]
         active_tests = json_data(file_name="active_tests.json")
-        current_test = active_tests[f"{callback_data[1]}"]
+        current_test = active_tests[f"{code}"]
         questions = current_test["test"]
         question = questions[0]
         students: dict = current_test["students"]
-        for key, value in students.items():
-            await bot.send_message(chat_id= int(key), text= question["text"]) 
-        await callback.message.answer(text= question["text"])
+        options: list = question["options"]
+        list_buttons = []
+        for option in options:
+            button = InlineKeyboardButton(text= option, callback_data=f"answer/{options.index(option)}/{code}")
+            list_buttons.append([button])
+        markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
+
+        for key, _ in students.items():
+            await bot.send_message(chat_id= int(key), text= question["text"], reply_markup= markup) 
+        await callback.message.answer(text= question["text"], reply_markup= next_question(question_index=0, code=code))
+    elif callback_data[0] == "next_question":
+        _, code, question_index = callback_data
+        question_index = int(question_index) 
+        question_index += 1
+        active_tests = json_data(file_name="active_tests.json")
+        current_test = active_tests[f"{code}"]
+        questions = current_test["test"]
+        question = questions[question_index]
+        students: dict = current_test["students"]
+        options: list = question["options"]
+        list_buttons = []
+        for option in options:
+            button = InlineKeyboardButton(text= option, callback_data=f"answer/{options.index(option)}/{code}")
+            list_buttons.append([button])
+        markup = InlineKeyboardMarkup(inline_keyboard=list_buttons)
+
+        for key, _ in students.items():
+            await bot.send_message(chat_id= int(key), text= question["text"], reply_markup= markup) 
+        await callback.message.answer(text= question["text"], reply_markup= next_question(question_index=question_index, code=code))
+    elif callback_data[0] == "answer":
+        _, option_index, code = callback_data
+        option_index = int(option_index)
+        user_id = str(callback.from_user.id)
+        active_tests = json_data(file_name="active_tests.json")
+        current_test = active_tests[f"{code}"]
+        students: dict = current_test["students"]
+        answers: list = students[user_id]["answers"]
+        question_index = len(answers)
+        question = current_test["test"][question_index]
+        option_text = question["options"][option_index]
+        answers.append(option_text)
+        save_data(file_name="active_tests.json", data=active_tests)
+        await callback.message.answer(text="Відповідь збережено")
