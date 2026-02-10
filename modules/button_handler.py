@@ -49,7 +49,9 @@ async def callback_handler(callback: CallbackQuery):
 
         for key, _ in students.items():
             await bot.send_message(chat_id= int(key), text= question["text"], reply_markup= markup) 
-        await callback.message.answer(text= question["text"], reply_markup= next_question(question_index=0, code=code))
+        options_str = "|".join(options)
+        teacher_text = f"{question["text"]} \n{options_str}"
+        await callback.message.answer(text= teacher_text, reply_markup= next_question(question_index=0, code=code))
     elif callback_data[0] == "next_question":
         _, code, question_index = callback_data
         question_index = int(question_index) 
@@ -60,6 +62,8 @@ async def callback_handler(callback: CallbackQuery):
         question = questions[question_index]
         students: dict = current_test["students"]
         options: list = question["options"]
+        options_str = "|".join(options)
+      
         list_buttons = []
         options_copy = options.copy()
         
@@ -74,10 +78,12 @@ async def callback_handler(callback: CallbackQuery):
 
         for key, _ in students.items():
             await bot.send_message(chat_id= int(key), text= question["text"], reply_markup= markup) 
+        
+        teacher_text = f"{question["text"]} \n{options_str}"
         if question_index != len(questions)-1:    
-            await callback.message.answer(text= question["text"], reply_markup= next_question(question_index=question_index, code=code))
+            await callback.message.answer(text= teacher_text, reply_markup= next_question(question_index=question_index, code=code))
         else:
-            await callback.message.answer(text= question["text"], reply_markup= end_test(code=code))
+            await callback.message.answer(text= teacher_text, reply_markup= end_test(code=code))
     elif callback_data[0] == "answer":
         _, option_index, code = callback_data
         option_index = int(option_index)
@@ -88,9 +94,26 @@ async def callback_handler(callback: CallbackQuery):
         answers: list = students[user_id]["answers"]
         question_index = len(answers)
         question = current_test["test"][question_index]
-        
-        
+
         answers.append(option_index)
         save_data(file_name="active_tests.json", data=active_tests)
         await callback.message.answer(text="Відповідь збережено")
-     
+
+    elif callback_data[0] == "end_test":
+        code = callback_data[1]
+        active_tests = json_data(file_name="active_tests.json")
+        current_test = active_tests[f"{code}"]
+        students: dict = current_test["students"]
+        questions = current_test["test"]
+        total_questions = len(questions)
+        students_result = ""
+        for user_id, user_data in students.items():
+            name = user_data["name"]
+            answers = user_data["answers"]
+            result =0
+            for answer in answers:
+                if answer == 0:
+                    result +=1 
+            # await bot.send_message
+            students_result += f"{name} - {result}/{total_questions}"
+        await callback.message.answer(text=students_result)
